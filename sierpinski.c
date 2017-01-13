@@ -12,7 +12,7 @@
 #include "vec.h"
 #include "glbase.h"
 
-#define immediate 1
+#define immediate 0
 
 const f32 screen_left   = -5;
 const f32 screen_right  = 55.0;
@@ -96,10 +96,13 @@ void draw_tree_rec(int n, const vec3 *origin, const vec3 *direction, float len, 
   vec3_add(origin, &end, &end);
   glColor3fv((f32*)&blue);
 
-  //int idx_a = mesh_add_point(m, origin);
-  //int idx_b = mesh_add_point(m, &end);
-  //mesh_add_pair(m, idx_a, idx_b);
-  if (immediate) draw_line(origin, &end);
+  if (immediate) {
+    draw_line(origin, &end);
+  } else {
+    int idx_a = mesh_add_point(m, origin);
+    int idx_b = mesh_add_point(m, &end);
+    mesh_add_pair(m, idx_a, idx_b);
+  }
 
   n--;
   vec3 new_direction;
@@ -155,12 +158,12 @@ int main(int n, char ** args) {
 
   the_tree = malloc(sizeof(*the_tree));
   memset(the_tree, 0, sizeof(*the_tree));
-  print_mem((void*) the_tree, sizeof(*the_tree));
 
-  //draw_tree(the_tree);
   //print_mem(the_tree, sizeof(*the_tree));
+  draw_tree(the_tree);
+  print_mem(the_tree, sizeof(*the_tree));
 
-  gl_display(draw);
-  //gl_display(draw_the_tree);
+  //gl_display(draw);
+  gl_display(draw_the_tree);
   gl_loop();
 }

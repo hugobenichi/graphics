@@ -33,7 +33,7 @@ void mesh_draw(mesh *m) {
   }
 }
 
-int mesh_add_point(mesh *m, vec3 *v) {
+int mesh_add_point(mesh *m, const vec3 *v) {
   P2("%p %p %d", m, m->points, m->n_points);
   if (!m->points) {
     P("alloc points %d", m->n_pairs);
