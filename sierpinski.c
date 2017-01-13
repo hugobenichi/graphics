@@ -56,7 +56,7 @@ void draw_sierpinski(int n, vec3 v0, xorshift64s r) {
   glEnd();
 }
 
-void draw_sierpinski2(int n, vec3 *a, vec3 *b, vec3 *c) {
+void draw_sierpinski2(int n, const vec3 *a, const vec3 *b, const vec3 *c) {
   if (!n) {
     return;
   }
@@ -96,9 +96,9 @@ void draw_tree_rec(int n, const vec3 *origin, const vec3 *direction, float len, 
   vec3_add(origin, &end, &end);
   glColor3fv((f32*)&blue);
 
-  int idx_a = mesh_add_point(m, origin);
-  int idx_b = mesh_add_point(m, &end);
-  mesh_add_pair(m, idx_a, idx_b);
+  //int idx_a = mesh_add_point(m, origin);
+  //int idx_b = mesh_add_point(m, &end);
+  //mesh_add_pair(m, idx_a, idx_b);
   if (immediate) draw_line(origin, &end);
 
   n--;
@@ -128,7 +128,7 @@ void draw_tree(mesh* m) {
 }
 
 void draw_the_tree() {
-  mesh_draw(&the_tree);
+  mesh_draw(the_tree);
 }
 
 void draw() {
@@ -150,25 +150,17 @@ int main(int n, char ** args) {
     .title  = "hello world",
   };
   gl_setup(&cfg);
-  //glutInit(&n, args);
-  //glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
-  //glutInitWindowSize(512,512);
-  //glutInitWindowPosition(0,0);
-  //glutCreateWindow("hello world");
 
   init_attributes();
 
   the_tree = malloc(sizeof(*the_tree));
   memset(the_tree, 0, sizeof(*the_tree));
-  print_mem(the_tree, sizeof(*the_tree));
+  print_mem((void*) the_tree, sizeof(*the_tree));
 
   //draw_tree(the_tree);
   //print_mem(the_tree, sizeof(*the_tree));
 
   gl_display(draw);
-  //glutDisplayFunc(draw);
-  //glutDisplayFunc(draw_the_tree);
-
-  //glutMainLoop();
+  //gl_display(draw_the_tree);
   gl_loop();
 }
