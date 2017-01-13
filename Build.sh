@@ -1,8 +1,10 @@
 #!/bin/bash
 
-#clang -c glsetup.c
+mkdir -p out/
 
-clear && clang -g -Os -o sierpinski glsetup.o sierpinski.c \
+[ -f out/glsetup.o ] || clang -o out/glsetup.o -c glsetup.c
+
+clear && clang -g -Os -o out/sierpinski out/glsetup.o sierpinski.c \
   -I../utilc \
   -framework GLUT \
   -framework OpenGL
