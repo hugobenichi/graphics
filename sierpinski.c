@@ -1,10 +1,10 @@
-#include <GLUT/glut.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>
 #include <OpenGL/glu.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "glsetup.h"
 #include "macro.h"
 #include "mesh.h"
 #include "prng.h"
@@ -140,11 +140,21 @@ void draw() {
 }
 
 int main(int n, char ** args) {
-  glutInit(&n, args);
-  glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
-  glutInitWindowSize(512,512);
-  glutInitWindowPosition(0,0);
-  glutCreateWindow("hello world");
+  struct glconfig cfg = (struct glconfig) {
+    .n      = n,
+    .args   = args,
+    .w      = 512,
+    .h      = 512,
+    .x      = 0,
+    .y      = 0,
+    .title  = "hello world",
+  };
+  gl_setup(&cfg);
+  //glutInit(&n, args);
+  //glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
+  //glutInitWindowSize(512,512);
+  //glutInitWindowPosition(0,0);
+  //glutCreateWindow("hello world");
 
   init_attributes();
 
@@ -152,11 +162,13 @@ int main(int n, char ** args) {
   memset(the_tree, 0, sizeof(*the_tree));
   print_mem(the_tree, sizeof(*the_tree));
 
-  draw_tree(the_tree);
-  print_mem(the_tree, sizeof(*the_tree));
+  //draw_tree(the_tree);
+  //print_mem(the_tree, sizeof(*the_tree));
 
+  gl_display(draw);
   //glutDisplayFunc(draw);
-  glutDisplayFunc(draw_the_tree);
+  //glutDisplayFunc(draw_the_tree);
 
-  glutMainLoop();
+  //glutMainLoop();
+  gl_loop();
 }
