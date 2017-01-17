@@ -1,11 +1,10 @@
+#include "glbase.h"
 #include "glsetup.h"
 #include "macro.h"
 #include "mesh.h"
 #include "prng.h"
 #include "types.h"
 #include "vec.h"
-#include "glbase.h"
-
 
 struct tree_recursion {
   vec3 origin;
@@ -62,7 +61,7 @@ void treerec_emit_draw(void *unused, const vec3 *a, const vec3 *b) {
 
 void treerec_emit_mesh(void *mesh_to_cast, const vec3 *a, const vec3 *b) {
   mesh *m = (mesh*) mesh_to_cast;
-  draw_line(a, b);
+  //draw_line(a, b);
   int idx_a = mesh_add_point(m, a);
   int idx_b = mesh_add_point(m, b);
   mesh_add_pair(m, idx_a, idx_b);
@@ -73,10 +72,11 @@ void draw_tree() {
 
   vec3 origin = {25, .0, .0};
   vec3 direction = {.0, 1, .0};
-  int iter = 10;
+  int iter = 5;
   f32 len = 20;
   xorshift64s r = 42;
 
+  mesh m = {0};
   struct tree_recursion treerec = (struct tree_recursion) {
     .origin = origin,
     .direction = direction,
@@ -84,11 +84,18 @@ void draw_tree() {
     .iter = iter,
     .len = len,
     .r = &r,
-    .emit = treerec_emit_draw,
+    .emit = treerec_emit_mesh,
+    //.emit = treerec_emit_draw,
+    .emit_args = &m,
   };
 
   glColor3fv((f32*)&blue);
   tree_recursion_do(&treerec);
 
+  //mesh_draw(&m);
   glFlush();
+  //free(m.points);
+  //free(m.index_pairs);
+
+  exit(0);
 }
