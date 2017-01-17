@@ -56,29 +56,6 @@ void tree_recursion_do(struct tree_recursion *tr) {
   tree_recursion_do(&next_tr);
 }
 
-void draw_tree_rec(int n, const vec3 *origin, const vec3 *direction, float len, xorshift64s *r) {
-  if (!n) return;
-  if (prng_next(r) % 5 > n) return;
-
-  f32 old_len = len;
-  len *= (0.4 + 0.5 * prng_next_f64(r));
-
-  vec3 end;
-  vec3_mult(direction, len, &end);
-  vec3_add(origin, &end, &end);
-
-  draw_line(origin, &end);
-
-  n--;
-  vec3 new_direction;
-
-  tree_displace(r, &offset, direction, &new_direction);
-  draw_tree_rec(n, &end, &new_direction, len, r);
-
-  tree_displace(r, &offset_neg, direction, &new_direction);
-  draw_tree_rec(n, &end, &new_direction, len, r);
-}
-
 void treerec_emit_draw(void *unused, const vec3 *a, const vec3 *b) {
   draw_line(a, b);
 }
@@ -94,7 +71,7 @@ void treerec_emit_mesh(void *mesh_to_cast, const vec3 *a, const vec3 *b) {
 void draw_tree() {
   glClear(GL_COLOR_BUFFER_BIT);
 
-  vec3 origin = {30, .0, .0};
+  vec3 origin = {25, .0, .0};
   vec3 direction = {.0, 1, .0};
   int iter = 10;
   f32 len = 20;
@@ -112,11 +89,6 @@ void draw_tree() {
 
   glColor3fv((f32*)&blue);
   tree_recursion_do(&treerec);
-
-  glColor3fv((f32*)&red);
-  origin.x = 15.0;
-  r = 42;
-  draw_tree_rec(iter, &origin, &direction, len, &r);
 
   glFlush();
 }
