@@ -2,9 +2,9 @@
 
 #include <OpenGL/gl.h>
 
-#include "vec.h"
-#include "types.h"
 #include "macro.h"
+#include "types.h"
+#include "vec.h"
 
 const vec3 red = {1.0, 0, 0};
 const vec3 blue = {0, 0, 1.0};
