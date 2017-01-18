@@ -1,3 +1,5 @@
+#pragma once
+
 #include "glbase.h"
 #include "glsetup.h"
 #include "macro.h"
@@ -26,6 +28,10 @@ void tree_displace(xorshift64s *r, const vec3 *offset, const vec3 *direction, ve
   vec3_renorm(out, out);
 }
 
+void tree_emit(struct tree_recursion *tr, const vec3 *a, const vec3 *b) {
+  tr->emit(tr->emit_args, a, b);
+}
+
 void tree_recursion_do(struct tree_recursion *tr) {
   if (!tr->iter) return;
   if (prng_next(tr->r) % 5 > tr->iter) return;
@@ -36,7 +42,7 @@ void tree_recursion_do(struct tree_recursion *tr) {
   vec3_mult(&tr->direction, len, &end);
   vec3_add(&tr->origin, &end, &end);
 
-  tr->emit(tr->emit_args, &tr->origin, &end);
+  tree_emit(tr, &tr->origin, &end);
 
   vec3 new_direction;
   vec3 new_offset;
@@ -59,9 +65,8 @@ void treerec_emit_draw(void *unused, const vec3 *a, const vec3 *b) {
   draw_line(a, b);
 }
 
-void treerec_emit_mesh(void *mesh_to_cast, const vec3 *a, const vec3 *b) {
-  mesh *m = (mesh*) mesh_to_cast;
-  //draw_line(a, b);
+void treerec_emit_mesh(void *expected_mesh, const vec3 *a, const vec3 *b) {
+  mesh *m = (mesh*) expected_mesh;
   int idx_a = mesh_add_point(m, a);
   int idx_b = mesh_add_point(m, b);
   mesh_add_pair(m, idx_a, idx_b);
@@ -72,7 +77,7 @@ void draw_tree() {
 
   vec3 origin = {25, .0, .0};
   vec3 direction = {.0, 1, .0};
-  int iter = 5;
+  int iter = 10;
   f32 len = 20;
   xorshift64s r = 42;
 
@@ -92,10 +97,16 @@ void draw_tree() {
   glColor3fv((f32*)&blue);
   tree_recursion_do(&treerec);
 
-  //mesh_draw(&m);
+  mesh_draw(&m);
   glFlush();
-  //free(m.points);
-  //free(m.index_pairs);
 
-  exit(0);
+  free(m.points);
+  free(m.pairs);
 }
+
+/* 
+ * TODO next
+ *  store segments as relative offsets
+ *  try applying deformation function
+ *  sync the redraw rate
+ */
