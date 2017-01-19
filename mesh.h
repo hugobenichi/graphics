@@ -44,12 +44,19 @@ void mesh_draw2(mesh *m, void (*disp)(vec3 *p)) {
   while (idx < end) {
     int idx_a = *idx++;
     int idx_b = *idx++;
+    vec3 *base_a = m->points + idx_a;
     vec3 *a = displacements + idx_a;
     vec3 *b = displacements + idx_b;
-    vec3 c;
-    vec3_sub(b, a, &c);
-    disp(&c);
-    vec3_add(&c, a, b);
+
+    vec3 base_disp;
+    vec3_sub(a, base_a, &base_disp);
+
+// TODO: relative base displacement not correctly applied
+// TODO: I should apply base displacement first, then apply relative disp
+    vec3_sub(b, a, b);
+    disp(b);
+    vec3_add(b, a, b);
+    vec3_add(b, &base_disp, b);
     draw_line(a, b);
   }
   free(displacements);

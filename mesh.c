@@ -43,7 +43,7 @@ void make_the_tree() {
     .origin     = origin,
     .direction  = {0, 1, 0},
     .offset     = offset,
-    .iter       = 10,
+    .iter       = 5,
     .len        = 20,
     .r          = &r,
     .emit       = treerec_emit_mesh,

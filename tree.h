@@ -15,15 +15,14 @@ f32  wind_str = 0.0;
 //const f32  wind_str = 1.0;
 
 int disp_counter = 0;
-f32 disp_off = 0.05;
+f32 disp_off = 0.01;
 f32 total_disp = 0;
 void disp_nothing(vec3 *p) {
-  //p->x += total_disp;
-
+  f32 n2 = vec3_norm2(p);
   f32 f = wind_str * vec3_dot(&wind_per, p);
-  vec3 force;
-  vec3_mult(&wind_dir, f, &force);
-  vec3_add(p, &force, p);
+  vec3_rot(p, f * -0.2, p);
+  f32 n2_b = vec3_norm2(p);
+  P(%e %e, n2, n2_b);
 }
 
 struct tree_recursion {
