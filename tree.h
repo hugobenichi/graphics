@@ -8,6 +8,10 @@
 #include "types.h"
 #include "vec.h"
 
+void disp_nothing(vec3 *p) {
+  //p->x *= 1.1;
+}
+
 struct tree_recursion {
   vec3 origin;
   vec3 direction;
@@ -40,7 +44,7 @@ void tree_recursion_do(struct tree_recursion *tr) {
 
   vec3 end;
   vec3_mult(&tr->direction, len, &end);
-  vec3_add(&tr->origin, &end, &end);
+  //vec3_add(&tr->origin, &end, &end);
 
   tree_emit(tr, &tr->origin, &end);
 
@@ -50,6 +54,7 @@ void tree_recursion_do(struct tree_recursion *tr) {
   next_tr.iter--;
   next_tr.len = len;
   next_tr.origin = end;
+  vec3_add(&tr->origin, &end, &next_tr.origin);
 
   tree_displace(tr->r, &tr->offset, &tr->direction, &new_direction);
   next_tr.direction = new_direction;
@@ -97,7 +102,7 @@ void draw_tree() {
   glColor3fv((f32*)&blue);
   tree_recursion_do(&treerec);
 
-  mesh_draw(&m);
+  mesh_draw(&m, disp_nothing);
   glFlush();
 
   free(m.points);
@@ -106,7 +111,6 @@ void draw_tree() {
 
 /* 
  * TODO next
- *  store segments as relative offsets
  *  try applying deformation function
  *  sync the redraw rate
  */

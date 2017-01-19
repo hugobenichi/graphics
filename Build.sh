@@ -1,15 +1,12 @@
 #!/bin/bash
 
-target=sierpinski.c
-out=out/sierpinski
-#target=mesh.c
-#out=out/mesh
+set -eux
+
+clear
 
 mkdir -p out/
 
-[ -f out/glsetup.o ] || clang -o out/glsetup.o -c glsetup.c
+[ -f out/glsetup.o ] || clang -g -o out/glsetup.o -c glsetup.c -I../utilc
 
-clear && clang -g -Os -o $out out/glsetup.o $target \
-  -I../utilc \
-  -framework GLUT \
-  -framework OpenGL
+clang  -I../utilc -g -Os -o out/mesh out/glsetup.o mesh.c -framework GLUT -framework OpenGL
+clang  -I../utilc -g -Os -o out/sierpinski out/glsetup.o sierpinski.c -framework GLUT -framework OpenGL

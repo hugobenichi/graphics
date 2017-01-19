@@ -21,25 +21,18 @@ struct Mesh {
 
 typedef struct Mesh mesh;
 
-void mesh_draw(mesh *m) {
-  // debugging
-  for (int i = 0; i < 2*m->n_pairs; i++) {
-    int *ptr = m->pairs + i;
-    P2("%p %d", ptr, *ptr);
-  }
-  //if (1) return;
-
+void mesh_draw(mesh *m, void (*disp)(vec3 *p)) {
   int *idx = m->pairs;
   int *end = m->pairs + 2 * m->n_pairs;
   while (idx < end) {
     int idx_a = *idx++;
     int idx_b = *idx++;
-P2("%d, %d", idx_a, idx_b);
     vec3 *a = m->points + idx_a;
     vec3 *b = m->points + idx_b;
-//vec3_print(a);
-//vec3_print(b);
-    draw_line(a, b);
+    vec3 c;
+    vec3_add(a, b, &c);
+    disp(&c);
+    draw_line(a, &c);
   }
 }
 

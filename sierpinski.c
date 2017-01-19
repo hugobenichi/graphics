@@ -4,21 +4,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "glbase.h"
 #include "glsetup.h"
 #include "macro.h"
-#include "mesh.h"
 #include "prng.h"
 #include "types.h"
 #include "vec.h"
-#include "glbase.h"
-#include "tree.h"
 
-const f32 screen_left   = -5;
-const f32 screen_right  = 55.0;
-const f32 screen_bottom = -5;
-const f32 screen_top    = 55.0;
-const f32 screen_near   = -1;
-const f32 screen_far    = +1;
+const struct glinit gl_screen_cfg = (struct glinit) {
+  .screen_left   = -5,
+  .screen_right  = 55.0,
+  .screen_bottom = -5,
+  .screen_top    = 55.0,
+  .screen_near   = -1,
+  .screen_far    = +1,
+};
 
 const vec3 triangle[3] = {
   {0.0, 0.0, 0.0},    // bottom left corner
@@ -26,16 +26,6 @@ const vec3 triangle[3] = {
   {50.0, 0.0, 0.0},   // bottom right corner
 };
 const vec3 p0 = {7.5, 5.0, 0.0};
-
-void init_attributes() {
-  glClearColor(1,1,1,1);
-  glPointSize(2.0);
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(screen_left, screen_right, screen_bottom, screen_top, screen_near, screen_far);
-  glMatrixMode(GL_MODELVIEW);
-}
 
 void sierpinski(int n, vec3 v0, xorshift64s r) {
   glBegin(GL_POINTS);
@@ -76,12 +66,6 @@ void draw_sierpinski() {
   glFlush();
 }
 
-static mesh *the_tree;
-
-void draw_the_tree() {
-  mesh_draw(the_tree);
-}
-
 int main(int n, char ** args) {
   struct glconfig cfg = (struct glconfig) {
     .n      = n,
@@ -93,17 +77,7 @@ int main(int n, char ** args) {
     .title  = "hello world",
   };
   gl_setup(&cfg);
-
-  init_attributes();
-
-  //the_tree = malloc(sizeof(*the_tree));
-  //memset(the_tree, 0, sizeof(*the_tree));
-  //print_mem(the_tree, sizeof(*the_tree));
-  //make_tree(the_tree);
-  //print_mem(the_tree, sizeof(*the_tree));
-
-  gl_display(draw_tree);
-  //gl_display(draw_the_tree);
-  //gl_display(draw_sierpinski);
+  gl_init(&gl_screen_cfg);
+  gl_display(draw_sierpinski);
   gl_loop();
 }
