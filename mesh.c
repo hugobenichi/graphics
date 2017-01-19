@@ -23,14 +23,24 @@ void draw_the_tree() {
   P(%d, draw_calls++);
   glClear(GL_COLOR_BUFFER_BIT);
   glColor3fv((f32*)&blue);
-  mesh_draw(&the_tree, disp_nothing);
+  mesh_draw2(&the_tree, disp_nothing);
   glFlush();
+
+  total_disp += disp_off;
+  wind_str += disp_off;
+  if (draw_calls % 50 == 0) {
+    disp_off = -disp_off;
+  }
+
+  gl_redisplay();
 }
 
 void make_the_tree() {
   xorshift64s r = 42;
+  vec3 origin = {25, .0, .0};
+  int idx_origin = mesh_add_point(&the_tree, &origin);
   struct tree_recursion treerec = (struct tree_recursion) {
-    .origin     = {25, 0, 0},
+    .origin     = origin,
     .direction  = {0, 1, 0},
     .offset     = offset,
     .iter       = 10,
@@ -38,6 +48,7 @@ void make_the_tree() {
     .r          = &r,
     .emit       = treerec_emit_mesh,
     .emit_args  = &the_tree,
+    .last_emit_index = idx_origin,
   };
   tree_recursion_do(&treerec);
 }

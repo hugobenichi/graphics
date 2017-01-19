@@ -8,8 +8,22 @@
 #include "types.h"
 #include "vec.h"
 
+
+const vec3 wind_dir = {1, 0, 0};
+const vec3 wind_per = {0, 1, 0};
+f32  wind_str = 0.0;
+//const f32  wind_str = 1.0;
+
+int disp_counter = 0;
+f32 disp_off = 0.05;
+f32 total_disp = 0;
 void disp_nothing(vec3 *p) {
-  //p->x *= 1.1;
+  //p->x += total_disp;
+
+  f32 f = wind_str * vec3_dot(&wind_per, p);
+  vec3 force;
+  vec3_mult(&wind_dir, f, &force);
+  vec3_add(p, &force, p);
 }
 
 struct tree_recursion {
@@ -19,8 +33,9 @@ struct tree_recursion {
   int iter;
   f32 len;
   xorshift64s *r;
-  void (*emit)(void *args, const vec3 *a, const vec3 *b);
+  int (*emit)(struct tree_recursion* self, const vec3 *a, const vec3 *b);
   void *emit_args;
+  int last_emit_index;
 };
 
 static const vec3 offset      = {1, 0, 0};
@@ -32,8 +47,8 @@ void tree_displace(xorshift64s *r, const vec3 *offset, const vec3 *direction, ve
   vec3_renorm(out, out);
 }
 
-void tree_emit(struct tree_recursion *tr, const vec3 *a, const vec3 *b) {
-  tr->emit(tr->emit_args, a, b);
+int tree_emit(struct tree_recursion *tr, const vec3 *a, const vec3 *b) {
+  return tr->emit(tr, a, b);
 }
 
 void tree_recursion_do(struct tree_recursion *tr) {
@@ -44,9 +59,11 @@ void tree_recursion_do(struct tree_recursion *tr) {
 
   vec3 end;
   vec3_mult(&tr->direction, len, &end);
-  //vec3_add(&tr->origin, &end, &end);
+  vec3_add(&tr->origin, &end, &end);
 
-  tree_emit(tr, &tr->origin, &end);
+  // If I know origin index, passed in as last_emit_index
+  int idx_end = tree_emit(tr, &tr->origin, &end);
+  // I get the index of added point
 
   vec3 new_direction;
   vec3 new_offset;
@@ -54,7 +71,8 @@ void tree_recursion_do(struct tree_recursion *tr) {
   next_tr.iter--;
   next_tr.len = len;
   next_tr.origin = end;
-  vec3_add(&tr->origin, &end, &next_tr.origin);
+  // I pass down end index to both recursive calls
+  next_tr.last_emit_index = idx_end;
 
   tree_displace(tr->r, &tr->offset, &tr->direction, &new_direction);
   next_tr.direction = new_direction;
@@ -66,15 +84,16 @@ void tree_recursion_do(struct tree_recursion *tr) {
   tree_recursion_do(&next_tr);
 }
 
-void treerec_emit_draw(void *unused, const vec3 *a, const vec3 *b) {
+int treerec_emit_draw(void *unused, const vec3 *a, const vec3 *b) {
   draw_line(a, b);
+  return 0;
 }
 
-void treerec_emit_mesh(void *expected_mesh, const vec3 *a, const vec3 *b) {
-  mesh *m = (mesh*) expected_mesh;
-  int idx_a = mesh_add_point(m, a);
+int treerec_emit_mesh(struct tree_recursion *tr, const vec3 *a, const vec3 *b) {
+  mesh *m = (mesh*) tr->emit_args;
   int idx_b = mesh_add_point(m, b);
-  mesh_add_pair(m, idx_a, idx_b);
+  mesh_add_pair(m, tr->last_emit_index, idx_b);
+  return idx_b;
 }
 
 void draw_tree() {
@@ -87,6 +106,7 @@ void draw_tree() {
   xorshift64s r = 42;
 
   mesh m = {0};
+  int idx_origin = mesh_add_point(&m, &origin);
   struct tree_recursion treerec = (struct tree_recursion) {
     .origin = origin,
     .direction = direction,
@@ -97,6 +117,7 @@ void draw_tree() {
     .emit = treerec_emit_mesh,
     //.emit = treerec_emit_draw,
     .emit_args = &m,
+    .last_emit_index = idx_origin,
   };
 
   glColor3fv((f32*)&blue);
@@ -109,7 +130,7 @@ void draw_tree() {
   free(m.pairs);
 }
 
-/* 
+/*
  * TODO next
  *  try applying deformation function
  *  sync the redraw rate

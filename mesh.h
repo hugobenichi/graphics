@@ -29,11 +29,30 @@ void mesh_draw(mesh *m, void (*disp)(vec3 *p)) {
     int idx_b = *idx++;
     vec3 *a = m->points + idx_a;
     vec3 *b = m->points + idx_b;
-    vec3 c;
-    vec3_add(a, b, &c);
-    disp(&c);
-    draw_line(a, &c);
+    draw_line(a, b);
   }
+}
+
+void mesh_draw2(mesh *m, void (*disp)(vec3 *p)) {
+  // I need to store the displacement of previous points
+  // so I am copying stuff
+  size_t s = m->n_points * sizeof(*m->points);
+  vec3 *displacements = malloc(s);
+  memcpy(displacements, m->points, s);
+  int *idx = m->pairs;
+  int *end = m->pairs + 2 * m->n_pairs;
+  while (idx < end) {
+    int idx_a = *idx++;
+    int idx_b = *idx++;
+    vec3 *a = displacements + idx_a;
+    vec3 *b = displacements + idx_b;
+    vec3 c;
+    vec3_sub(b, a, &c);
+    disp(&c);
+    vec3_add(&c, a, b);
+    draw_line(a, b);
+  }
+  free(displacements);
 }
 
 int mesh_add_point(mesh *m, const vec3 *v) {

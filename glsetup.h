@@ -25,3 +25,4 @@ void gl_setup(const struct glconfig* cfg);
 void gl_display(void (*fn)(void));
 void gl_loop(void);
 void gl_init(const struct glinit* cfg);
+void gl_redisplay(void);

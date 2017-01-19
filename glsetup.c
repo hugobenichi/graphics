@@ -29,3 +29,7 @@ void gl_init(const struct glinit* cfg) {
   glOrtho(cfg->screen_left, cfg->screen_right, cfg->screen_bottom, cfg->screen_top, cfg->screen_near, cfg->screen_far);
   glMatrixMode(GL_MODELVIEW);
 }
+
+void gl_redisplay(void) {
+  glutPostRedisplay();
+}
