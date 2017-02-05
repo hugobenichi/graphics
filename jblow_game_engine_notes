@@ -1,0 +1,16 @@
+Mesh VBOs:
+==========
+  mesh data:
+    vertices []vec3
+    uvs      []vec2 // are these normals ??
+    vertex_Frames []{normal: vec3, tangent: vec3, binormal: vec3}
+      // tangents are the x axis, binormals are the y axis, normal are the z axis
+    colors  []vec4
+    canonical_vertex_map []vec3 // ??
+    // computed
+    lightmap_uvs []vec2
+    lightmap_colors []vec4
+
+      typically the vertices of one mesh might be different materials rendered by different shadders
+        => therefore also add a list of metadata structs that identifies subblocks of vertices in the mesh and how to draw them
+
