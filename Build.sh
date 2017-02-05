@@ -10,3 +10,4 @@ mkdir -p out/
 
 clang  -I../utilc -g -Os -o out/mesh out/glsetup.o mesh.c -framework GLUT -framework OpenGL
 clang  -I../utilc -g -Os -o out/sierpinski out/glsetup.o sierpinski.c -framework GLUT -framework OpenGL
+clang  -I../utilc -g -Os -o out/noise out/glsetup.o noise.c -framework GLUT -framework OpenGL

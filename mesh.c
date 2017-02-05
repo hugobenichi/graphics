@@ -19,16 +19,24 @@ static mesh the_tree = {0};
 
 int draw_calls = 0;
 
+xorshift64s wind_force_r = 1;
+
+f32 disp_off = 0.01;
 void draw_the_tree() {
   P(%d, draw_calls++);
   glClear(GL_COLOR_BUFFER_BIT);
   glColor3fv((f32*)&blue);
-  mesh_draw2(&the_tree, disp_nothing);
+  mesh_draw(&the_tree, disp_wind);
   glFlush();
 
-  total_disp += disp_off;
-  wind_str += disp_off;
-  if (draw_calls % 50 == 0) {
+  f32 dp = 0;
+  for (int i = 0; i < 20; i++) {
+    dp += prng_next_f64(&wind_force_r) - 0.5;
+  }
+
+  P(%e, dp);
+  wind_str += dp/10 + disp_off;
+  if (draw_calls % 40 == 0) {
     disp_off = -disp_off;
   }
 
@@ -43,7 +51,7 @@ void make_the_tree() {
     .origin     = origin,
     .direction  = {0, 1, 0},
     .offset     = offset,
-    .iter       = 5,
+    .iter       = 10,
     .len        = 20,
     .r          = &r,
     .emit       = treerec_emit_mesh,

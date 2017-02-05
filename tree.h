@@ -11,18 +11,12 @@
 
 const vec3 wind_dir = {1, 0, 0};
 const vec3 wind_per = {0, 1, 0};
-f32  wind_str = 0.0;
-//const f32  wind_str = 1.0;
+f32  wind_str = 0.01;
 
-int disp_counter = 0;
-f32 disp_off = 0.01;
-f32 total_disp = 0;
-void disp_nothing(vec3 *p) {
-  f32 n2 = vec3_norm2(p);
-  f32 f = wind_str * vec3_dot(&wind_per, p);
-  vec3_rot(p, f * -0.2, p);
-  f32 n2_b = vec3_norm2(p);
-  P(%e %e, n2, n2_b);
+void disp_wind(vec3 *p, vec4* d) {
+  //f32 f = wind_str * vec3_dot(&wind_per, p);
+  //d->t = -0.05 * fabs(f);
+  d->t = - 0.2 * wind_str;
 }
 
 struct tree_recursion {
@@ -122,7 +116,7 @@ void draw_tree() {
   glColor3fv((f32*)&blue);
   tree_recursion_do(&treerec);
 
-  mesh_draw(&m, disp_nothing);
+  mesh_draw(&m, disp_wind);
   glFlush();
 
   free(m.points);

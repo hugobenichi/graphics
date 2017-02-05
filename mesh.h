@@ -21,43 +21,42 @@ struct Mesh {
 
 typedef struct Mesh mesh;
 
-void mesh_draw(mesh *m, void (*disp)(vec3 *p)) {
+void mesh_draw(mesh *m, void (*disp)(vec3 *p, vec4 *d)) {
+  vec4 *displacements = calloc(m->n_points, sizeof(vec4));
   int *idx = m->pairs;
   int *end = m->pairs + 2 * m->n_pairs;
+
+  idx += 2;
+  draw_line(m->points, (m->points + 1));
   while (idx < end) {
     int idx_a = *idx++;
     int idx_b = *idx++;
+
     vec3 *a = m->points + idx_a;
     vec3 *b = m->points + idx_b;
-    draw_line(a, b);
-  }
-}
+    vec4 *disp_a = displacements + idx_a;
+    vec4 *disp_b = displacements + idx_b;
 
-void mesh_draw2(mesh *m, void (*disp)(vec3 *p)) {
-  // I need to store the displacement of previous points
-  // so I am copying stuff
-  size_t s = m->n_points * sizeof(*m->points);
-  vec3 *displacements = malloc(s);
-  memcpy(displacements, m->points, s);
-  int *idx = m->pairs;
-  int *end = m->pairs + 2 * m->n_pairs;
-  while (idx < end) {
-    int idx_a = *idx++;
-    int idx_b = *idx++;
-    vec3 *base_a = m->points + idx_a;
-    vec3 *a = displacements + idx_a;
-    vec3 *b = displacements + idx_b;
+// BUG: seems almost good, but the effect does not totally
+// aggregate itself correctly for end segments
+    // first transform segment b - a into b' - a' by applying
+    // disp_a coming from previous segment ending in a.
+    vec3 ab, a2, b2;
+    vec3_sub(b, a, &ab);
+    vec3_add(a, (vec3*) disp_a, &a2); // a' = dp1.translation(a)
+    vec3_rot(&ab, disp_a->t, &ab);    // (b' - a') = dp1.rotation(b - a)
+    // second compute displacement on b' - a' to get b'' - a'
+    //    (ignoring translation part)
+    disp(&ab, disp_b);
+    vec3_rot(&ab, disp_b->t, &ab);    // b'' - a' = dp2(b' - a')
+    vec3_add(&a2, &ab, &b2);          // get b''
+    // third write total translation on b: b'' - b
+    vec3_sub(&b2, b, (vec3*) disp_b);
 
-    vec3 base_disp;
-    vec3_sub(a, base_a, &base_disp);
-
-// TODO: relative base displacement not correctly applied
-// TODO: I should apply base displacement first, then apply relative disp
-    vec3_sub(b, a, b);
-    disp(b);
-    vec3_add(b, a, b);
-    vec3_add(b, &base_disp, b);
-    draw_line(a, b);
+//P((%e,%e) -> (%e,%e), a->x, a->y, b->x, b->y);
+//P((%e,%e) -> (%e,%e), a2.x, a2.y, b2.x, b2.y);
+    //draw_line(a, b);
+    draw_line(&a2, &b2);
   }
   free(displacements);
 }
