@@ -1,0 +1,9 @@
+a range is something that
+  has a beginning
+  has and an end, optionally (linked list, infinite range)
+  that can be traversed in order consistently
+  if it has an end, it has a size
+
+an output range, simply has a push method
+
+
